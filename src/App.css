@@ -138,7 +138,7 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr;
+  grid-template-columns: 2fr 1.2fr 1.2fr 2fr;
   gap: 1rem;
   margin-bottom: 1.25rem;
 }
@@ -280,7 +280,7 @@
 
 .expense-main-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -322,6 +322,43 @@
   font-size: 1.05rem;
   font-weight: 600;
   color: #f8fafc;
+}
+
+.expense-text {
+  min-width: 0;
+}
+
+.expense-participants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.participant-share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.btn-paid {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radius-sm);
+  color: #6ee7b7;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.55rem;
+}
+
+.btn-paid.is-paid {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: var(--border-subtle);
+  color: var(--text-muted);
 }
 
 .expense-actions-wrapper {

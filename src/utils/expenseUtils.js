@@ -8,6 +8,46 @@ export const FILTER_CATEGORIES = ['All', ...CATEGORIES];
 export const MAX_EXPENSE_AMOUNT = 100000;
 
 /**
+ * Parses comma-separated participant names, trimming blanks and duplicates.
+ *
+ * @param {string} value
+ * @returns {string[]}
+ */
+export function parseParticipantNames(value) {
+  const names = (value || '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+
+  return names.filter(
+    (name, index) =>
+      names.findIndex((candidate) => candidate.toLowerCase() === name.toLowerCase()) === index,
+  );
+}
+
+/**
+ * Splits a currency amount into shares that add up to the original amount.
+ *
+ * @param {number} amount
+ * @param {number} participantCount
+ * @returns {number[]}
+ */
+export function splitAmountEvenly(amount, participantCount) {
+  if (!Number.isFinite(amount) || participantCount <= 0) {
+    return [];
+  }
+
+  const totalCents = Math.round((amount + Number.EPSILON) * 100);
+  const baseCents = Math.floor(totalCents / participantCount);
+  const remainingCents = totalCents % participantCount;
+
+  return Array.from(
+    { length: participantCount },
+    (_, index) => (baseCents + (index < remainingCents ? 1 : 0)) / 100,
+  );
+}
+
+/**
  * Validates expense input fields.
  * 
  * Rules:

@@ -31,11 +31,32 @@ describe('Expense Tracker: Component & Integration Suite', () => {
         title: 'Dinner with Friends',
         amount: 850.5,
         category: 'Food',
+        participants: [],
       });
 
       // Fields should be reset
       expect(titleInput).toHaveValue('');
       expect(amountInput).toHaveValue(null);
+    });
+
+    it('adds normalized participant names and resets the participants field', async () => {
+      const user = userEvent.setup();
+      const mockAddExpense = vi.fn();
+
+      render(<ExpenseForm onAddExpense={mockAddExpense} />);
+      await user.type(screen.getByLabelText(/expense title/i), 'Dinner');
+      await user.type(screen.getByLabelText(/amount/i), '30');
+      const participantsInput = screen.getByLabelText(/people sharing/i);
+      await user.type(participantsInput, ' Alex, Sam, alex, , Taylor ');
+      await user.click(screen.getByRole('button', { name: /add expense/i }));
+
+      expect(mockAddExpense).toHaveBeenCalledWith({
+        title: 'Dinner',
+        amount: 30,
+        category: 'Food',
+        participants: ['Alex', 'Sam', 'Taylor'],
+      });
+      expect(participantsInput).toHaveValue('');
     });
 
     it('Hand-written Test 2: rejects an empty title and shows error', async () => {
@@ -142,6 +163,30 @@ describe('Expense Tracker: Component & Integration Suite', () => {
 
       expect(document.querySelectorAll('[data-cy="expense-item"]')).toHaveLength(1);
       expect(document.querySelector('[data-cy="count"]')).toHaveTextContent('1');
+    });
+
+    describe('Shared expenses', () => {
+      it('shows equal shares and toggles each participant payment without changing the total', async () => {
+        const user = userEvent.setup();
+        render(<App />);
+
+        await user.type(screen.getByLabelText(/expense title/i), 'Dinner');
+        await user.type(screen.getByLabelText(/amount/i), '10');
+        await user.type(screen.getByLabelText(/people sharing/i), 'Alex, Sam, Taylor');
+        await user.click(screen.getByRole('button', { name: /add expense/i }));
+
+        expect(screen.getByText('Alex: ₹3.34')).toBeInTheDocument();
+        expect(screen.getByText('Sam: ₹3.33')).toBeInTheDocument();
+        expect(screen.getByText('Taylor: ₹3.33')).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Mark Alex paid' }));
+        expect(screen.getByRole('button', { name: 'Mark Alex unpaid' })).toHaveTextContent('Paid');
+        expect(screen.getByRole('button', { name: 'Mark Sam paid' })).toHaveTextContent('Mark paid');
+        expect(document.querySelector('[data-cy="total"]')).toHaveTextContent('10.00');
+
+        await user.click(screen.getByRole('button', { name: 'Mark Alex unpaid' }));
+        expect(screen.getByRole('button', { name: 'Mark Alex paid' })).toHaveTextContent('Mark paid');
+      });
     });
   });
 });
