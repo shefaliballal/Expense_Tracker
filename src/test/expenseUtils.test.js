@@ -5,6 +5,8 @@ import {
   formatCurrency,
   filterExpenses,
   MAX_EXPENSE_AMOUNT,
+  parseParticipantNames,
+  splitAmountEvenly,
 } from '../utils/expenseUtils';
 
 describe('expenseUtils: Pure Logic Suite', () => {
@@ -89,6 +91,24 @@ describe('expenseUtils: Pure Logic Suite', () => {
       expect(formatCurrency(650)).toBe('650.00');
       expect(formatCurrency(250.5)).toBe('250.50');
       expect(formatCurrency(0)).toBe('0.00');
+    });
+
+    describe('shared expense helpers', () => {
+      it('trims participant names and ignores blanks and case-insensitive duplicates', () => {
+        expect(parseParticipantNames(' Alex, Sam, alex, , Taylor ')).toEqual([
+          'Alex',
+          'Sam',
+          'Taylor',
+        ]);
+      });
+
+      it('splits to cents and distributes remainder so shares total the expense', () => {
+        const shares = splitAmountEvenly(10, 3);
+
+        expect(shares).toEqual([3.34, 3.33, 3.33]);
+        expect(shares.reduce((total, share) => total + share, 0)).toBe(10);
+        expect(splitAmountEvenly(10, 0)).toEqual([]);
+      });
     });
 
     it('returns "0.00" for invalid values', () => {

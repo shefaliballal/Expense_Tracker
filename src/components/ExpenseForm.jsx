@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CATEGORIES, validateExpenseInput } from '../utils/expenseUtils';
+import { CATEGORIES, parseParticipantNames, validateExpenseInput } from '../utils/expenseUtils';
 
 /**
  * ExpenseForm Component
@@ -12,12 +12,14 @@ import { CATEGORIES, validateExpenseInput } from '../utils/expenseUtils';
  * - title: string, current value of the title text input
  * - amount: string, current value of the amount number input
  * - category: string, current selected category ('Food', 'Travel', 'Bills', 'Other')
+ * - participants: string, comma-separated names sharing the expense
  * - error: string | null, validation error message displayed if input validation fails
  */
 export default function ExpenseForm({ onAddExpense }) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Food');
+  const [participants, setParticipants] = useState('');
   const [error, setError] = useState(null);
 
   const handleSubmit = (e) => {
@@ -35,12 +37,14 @@ export default function ExpenseForm({ onAddExpense }) {
       title: title.trim(),
       amount: parseFloat(amount),
       category,
+      participants: parseParticipantNames(participants),
     });
 
     // Reset form inputs to pristine state
     setTitle('');
     setAmount('');
     setCategory('Food');
+    setParticipants('');
   };
 
   return (
@@ -102,6 +106,21 @@ export default function ExpenseForm({ onAddExpense }) {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="expense-participants">People sharing (optional)</label>
+          <input
+            id="expense-participants"
+            type="text"
+            placeholder="e.g. Alex, Sam"
+            value={participants}
+            onChange={(e) => {
+              setParticipants(e.target.value);
+              if (error) setError(null);
+            }}
+            data-cy="participants"
+          />
         </div>
       </div>
 

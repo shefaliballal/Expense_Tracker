@@ -7,11 +7,12 @@ import ExpenseItem from './ExpenseItem';
  * Props:
  * - expenses: Array of expense objects to render.
  * - onDelete: Function(id) passed down to each ExpenseItem.
+ * - onToggleParticipantPaid: Function(expenseId, participantName) for payment status changes.
  * 
  * State:
  * - Stateless container component.
  */
-export default function ExpenseList({ expenses, onDelete }) {
+export default function ExpenseList({ expenses, onDelete, onToggleParticipantPaid }) {
   if (!expenses || expenses.length === 0) {
     return (
       <div className="empty-expenses-state">
@@ -28,6 +29,7 @@ export default function ExpenseList({ expenses, onDelete }) {
           key={expense.id}
           expense={expense}
           onDelete={onDelete}
+          onToggleParticipantPaid={onToggleParticipantPaid}
         />
       ))}
     </div>

@@ -9,12 +9,14 @@ import { formatCurrency } from '../utils/expenseUtils';
  *   The expense record to display.
  * - onDelete: Function(id: string|number)
  *   Callback triggered when the user clicks the delete button for this item.
+ * - onToggleParticipantPaid: Function(expenseId, participantName)
+ *   Callback that toggles the payment status of one participant.
  * 
  * State:
  * - Stateless presentational component.
  */
-export default function ExpenseItem({ expense, onDelete }) {
-  const { id, title, amount, category } = expense;
+export default function ExpenseItem({ expense, onDelete, onToggleParticipantPaid }) {
+  const { id, title, amount, category, participants = [] } = expense;
 
   const getCategoryBadgeClass = (cat) => {
     switch (cat?.toLowerCase()) {
@@ -37,6 +39,26 @@ export default function ExpenseItem({ expense, onDelete }) {
         </span>
         <div className="expense-text">
           <h4 className="expense-item-title">{title}</h4>
+          {participants.length > 0 && (
+            <div className="expense-participants" aria-label={`Shares for ${title}`}>
+              {participants.map((participant) => (
+                <div className="participant-share" key={participant.name}>
+                  <span>
+                    {participant.name}: ₹{formatCurrency(participant.amount)}
+                  </span>
+                  <button
+                    type="button"
+                    className={`btn-paid${participant.paid ? ' is-paid' : ''}`}
+                    onClick={() => onToggleParticipantPaid(id, participant.name)}
+                    aria-label={`Mark ${participant.name} ${participant.paid ? 'unpaid' : 'paid'}`}
+                    data-cy="mark-paid"
+                  >
+                    {participant.paid ? 'Paid' : 'Mark paid'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

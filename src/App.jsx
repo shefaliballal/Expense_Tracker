@@ -2,19 +2,25 @@ import React, { useState } from 'react';
 import ExpenseForm from './components/ExpenseForm';
 import CategoryFilter from './components/CategoryFilter';
 import ExpenseList from './components/ExpenseList';
-import { calculateTotal, formatCurrency, filterExpenses } from './utils/expenseUtils';
+import {
+  calculateTotal,
+  filterExpenses,
+  formatCurrency,
+  splitAmountEvenly,
+} from './utils/expenseUtils';
 import './App.css';
 
 /**
  * App Component (Root)
  * 
  * Owns primary application state:
- * - expenses: Array of { id: string|number, title: string, amount: number, category: string, createdAt: string }
+ * - expenses: Array of { id, title, amount, category, participants, createdAt }
  * - filterCategory: string ('All' | 'Food' | 'Travel' | 'Bills' | 'Other')
  * 
  * Provides:
  * - Adding expenses with unique IDs
  * - Deleting expenses by ID
+ * - Toggling individual participant payment status
  * - Category-based filtering
  * - Running total display (formatted to 2 decimal places)
  * - Visible item count
@@ -25,8 +31,14 @@ export default function App() {
 
   // Add a newly validated expense to state
   const handleAddExpense = (newExpenseData) => {
+    const shares = splitAmountEvenly(newExpenseData.amount, newExpenseData.participants.length);
     const expenseWithId = {
       ...newExpenseData,
+      participants: newExpenseData.participants.map((name, index) => ({
+        name,
+        amount: shares[index],
+        paid: false,
+      })),
       id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
       createdAt: new Date().toISOString(),
     };
@@ -36,6 +48,23 @@ export default function App() {
   // Delete an expense by its ID
   const handleDeleteExpense = (idToDelete) => {
     setExpenses((prev) => prev.filter((item) => item.id !== idToDelete));
+  };
+
+  const handleToggleParticipantPaid = (expenseId, participantName) => {
+    setExpenses((prev) =>
+      prev.map((expense) =>
+        expense.id === expenseId
+          ? {
+              ...expense,
+              participants: expense.participants.map((participant) =>
+                participant.name === participantName
+                  ? { ...participant, paid: !participant.paid }
+                  : participant,
+              ),
+            }
+          : expense,
+      ),
+    );
   };
 
   // Compute displayed expenses and running metrics
@@ -98,6 +127,7 @@ export default function App() {
           <ExpenseList
             expenses={displayedExpenses}
             onDelete={handleDeleteExpense}
+            onToggleParticipantPaid={handleToggleParticipantPaid}
           />
         </section>
       </main>
